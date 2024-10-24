@@ -64,7 +64,7 @@ export const buildAggregation = ({
 
   if (collectionConfig && Object.keys(collectionConfig.joins).length !== 0 && joins !== false) {
     const joinConfig = adapter.payload.collections[collection].config.joins
-    for (const slug of Object.keys(collectionConfig)) {
+    for (const slug of Object.keys(collectionConfig.joins)) {
       for (const join of joinConfig[slug]) {
         const joinModel = adapter.collections[join.field.collection]
 
