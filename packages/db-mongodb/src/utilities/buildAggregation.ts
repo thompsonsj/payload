@@ -21,7 +21,7 @@ type BuildAggregationArgs = {
   versions?: boolean
 }
 
-export const buildAggregation = ({
+export const buildAggregation = async ({
   adapter,
   collection,
   collectionConfig,
@@ -32,7 +32,7 @@ export const buildAggregation = ({
   projection,
   query,
   versions,
-}: BuildAggregationArgs): PipelineStage[] | undefined => {
+}: BuildAggregationArgs): Promise<PipelineStage[] | undefined> => {
   if (
     !incomingPipeline.length &&
     (Object.keys(collectionConfig?.joins ?? []).length === 0 || joins === false)
@@ -87,7 +87,7 @@ export const buildAggregation = ({
         const joinPipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = []
         const joinProjection: Record<string, boolean> = {}
 
-        const $match = joinModel.buildQuery({
+        const $match = await joinModel.buildQuery({
           locale,
           payload: adapter.payload,
           pipeline: joinPipeline,

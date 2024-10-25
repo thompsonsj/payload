@@ -30,7 +30,7 @@ export const findOne: FindOne = async function findOne(
     where,
   })
 
-  const aggregate = buildAggregation({
+  const aggregate = await buildAggregation({
     adapter: this,
     collection,
     collectionConfig,

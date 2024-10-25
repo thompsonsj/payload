@@ -108,7 +108,7 @@ export const find: Find = async function find(
 
   let result
 
-  const aggregate = buildAggregation({
+  const aggregate = await buildAggregation({
     adapter: this,
     collection,
     collectionConfig,

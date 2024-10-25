@@ -108,7 +108,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   let result
 
-  const aggregate = buildAggregation({
+  const aggregate = await buildAggregation({
     adapter: this,
     collection,
     collectionConfig,
