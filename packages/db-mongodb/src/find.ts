@@ -6,7 +6,7 @@ import { flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import { buildAggregation } from './utilities/buildJoinAggregation.js'
+import { buildAggregation } from './utilities/buildAggregation.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -49,11 +49,12 @@ export const find: Find = async function find(
   const pipeline: PipelineStage[] = []
   const projection: Record<string, boolean> = {}
 
-  const query = Model.buildQuery({
+  const query = await Model.buildQuery({
     locale,
     payload: this.payload,
     pipeline,
     projection,
+    session: options.session,
     where,
   })
 

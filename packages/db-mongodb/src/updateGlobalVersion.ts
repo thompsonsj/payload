@@ -9,7 +9,6 @@ import {
 
 import type { MongooseAdapter } from './index.js'
 
-import { buildQueryWithAggregate } from './utilities/buildQueryWithAggregate.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 
@@ -32,9 +31,8 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     new: true,
   }
 
-  const query = await buildQueryWithAggregate({
+  const query = await VersionModel.buildQuery({
     locale,
-    Model: VersionModel,
     payload: this.payload,
     session: options.session,
     where: whereToUse,

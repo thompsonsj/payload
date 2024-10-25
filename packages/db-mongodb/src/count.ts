@@ -23,10 +23,11 @@ export const count: Count = async function count(
 
   const pipeline: PipelineStage[] = []
 
-  const query = Model.buildQuery({
+  const query = await Model.buildQuery({
     locale,
     payload: this.payload,
     pipeline,
+    session: options.session,
     where,
   })
 

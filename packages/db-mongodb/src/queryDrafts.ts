@@ -6,7 +6,7 @@ import { combineQueries, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import { buildAggregation } from './utilities/buildJoinAggregation.js'
+import { buildAggregation } from './utilities/buildAggregation.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -51,11 +51,12 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   const pipeline: PipelineStage[] = []
   const projection: Record<string, boolean> = {}
 
-  const versionQuery = VersionModel.buildQuery({
+  const versionQuery = await VersionModel.buildQuery({
     locale,
     payload: this.payload,
     pipeline,
     projection,
+    session: options.session,
     where: combinedWhere,
   })
 

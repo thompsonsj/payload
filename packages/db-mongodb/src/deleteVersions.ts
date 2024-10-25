@@ -3,7 +3,6 @@ import type { DeleteVersions, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { buildQueryWithAggregate } from './utilities/buildQueryWithAggregate.js'
 import { withSession } from './withSession.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersions(
@@ -16,9 +15,8 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
     lean: true,
   }
 
-  const query = await buildQueryWithAggregate({
+  const query = await VersionsModel.buildQuery({
     locale,
-    Model: VersionsModel,
     payload: this.payload,
     session: options.session,
     where,

@@ -4,7 +4,6 @@ import { buildVersionCollectionFields, type PayloadRequest, type UpdateVersion }
 
 import type { MongooseAdapter } from './index.js'
 
-import { buildQueryWithAggregate } from './utilities/buildQueryWithAggregate.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 
@@ -20,9 +19,8 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     new: true,
   }
 
-  const query = await buildQueryWithAggregate({
+  const query = await VersionModel.buildQuery({
     locale,
-    Model: VersionModel,
     payload: this.payload,
     session: options.session,
     where: whereToUse,

@@ -5,7 +5,6 @@ import { combineQueries } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { buildQueryWithAggregate } from './utilities/buildQueryWithAggregate.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -19,10 +18,9 @@ export const findGlobal: FindGlobal = async function findGlobal(
     lean: true,
   }
 
-  const query = await buildQueryWithAggregate({
+  const query = await Model.buildQuery({
     globalSlug: slug,
     locale,
-    Model,
     payload: this.payload,
     session: options.session,
     where: combineQueries({ globalType: { equals: slug } }, where),

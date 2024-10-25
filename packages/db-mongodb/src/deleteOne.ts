@@ -2,7 +2,6 @@ import type { DeleteOne, Document, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { buildQueryWithAggregate } from './utilities/buildQueryWithAggregate.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -13,8 +12,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   const Model = this.collections[collection]
   const options = await withSession(this, req)
 
-  const query = await buildQueryWithAggregate({
-    Model,
+  const query = await Model.buildQuery({
     payload: this.payload,
     session: options.session,
     where,

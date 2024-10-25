@@ -3,7 +3,6 @@ import type { DeleteMany, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { buildQueryWithAggregate } from './utilities/buildQueryWithAggregate.js'
 import { withSession } from './withSession.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
@@ -16,8 +15,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
     lean: true,
   }
 
-  const query = await buildQueryWithAggregate({
-    Model,
+  const query = await Model.buildQuery({
     payload: this.payload,
     session: options.session,
     where,
