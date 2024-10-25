@@ -1,4 +1,9 @@
-import type { AggregatePaginateResult, PaginateOptions, PipelineStage } from 'mongoose'
+import type {
+  AggregatePaginateResult,
+  PaginateOptions,
+  PipelineStage,
+  QueryOptions,
+} from 'mongoose'
 import type { FindGlobalVersions, PayloadRequest } from 'payload'
 
 import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
@@ -28,7 +33,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     this.payload.config,
     this.payload.globals.config.find(({ slug }) => slug === global),
   )
-  const options = {
+  const options: QueryOptions = {
     ...(await withSession(this, req)),
     limit,
     skip,
@@ -55,12 +60,13 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   const pipeline: PipelineStage[] = []
   const projection: Record<string, boolean> = {}
 
-  const query = Model.buildQuery({
+  const query = await Model.buildQuery({
     globalSlug: global,
     locale,
     payload: this.payload,
     pipeline,
     projection,
+    session: options.session,
     where,
   })
 

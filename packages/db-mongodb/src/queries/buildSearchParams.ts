@@ -84,17 +84,11 @@ export function buildSearchParam({
     })
   }
 
-  // eslint-disable-next-line prefer-const
-  let [{ field, path }] = paths
+  let path = paths[0].path
+  const field = paths[0].field
 
   if (path) {
-    let {
-      // eslint-disable-next-line prefer-const
-      operator: formattedOperator,
-      // eslint-disable-next-line prefer-const
-      rawQuery,
-      val: formattedValue,
-    } = sanitizeQueryValue({
+    const result = sanitizeQueryValue({
       field,
       hasCustomID,
       operator,
@@ -102,17 +96,17 @@ export function buildSearchParam({
       val,
     })
 
+    let formattedValue = result.val
+    const { operator: formattedOperator, rawQuery } = result
+
     if (rawQuery) {
       return { value: rawQuery }
     }
 
     // If there are multiple collections to search through,
-    // Recursively build up a list of query constraints
+    // Build $lookup
     if (paths.length > 1) {
       let isID = false
-      // Remove top collection and reverse array
-      // to work backwards from top
-      // const pathsToQuery = paths.slice(1).reverse()
 
       let currentPath: string
 
@@ -123,6 +117,7 @@ export function buildSearchParam({
           currentPath = pathToQuery.path
         }
 
+        // If the next is id, like article.id - don't need to add $lookup since we can query just article
         if (i + 1 === paths.length - 1 && paths[i + 1].path === 'id') {
           isID = true
           break
@@ -143,6 +138,7 @@ export function buildSearchParam({
           },
         })
 
+        // Remove the joined doc from result if projection is passed
         if (i === 1 && typeof projection === 'object') {
           projection[`_${currentPath}`] = false
         }
