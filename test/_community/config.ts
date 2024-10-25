@@ -180,16 +180,18 @@ export default buildConfigWithDefaults({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
     schema: [
       ({ jsonSchema }) => {
-        jsonSchema.definitions.objectWithNumber = {
-          type: 'object',
-          additionalProperties: false,
-          properties: {
-            id: {
-              type: 'number',
-              required: true,
+        if (jsonSchema.definitions) {
+          jsonSchema.definitions.objectWithNumber = {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              id: {
+                type: 'number',
+                required: true,
+              },
             },
-          },
-          required: true,
+            required: true,
+          }
         }
         return jsonSchema
       },
