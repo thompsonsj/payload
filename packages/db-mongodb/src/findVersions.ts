@@ -1,4 +1,9 @@
-import type { AggregatePaginateResult, PaginateOptions, PipelineStage } from 'mongoose'
+import type {
+  AggregatePaginateResult,
+  PaginateOptions,
+  PipelineStage,
+  QueryOptions,
+} from 'mongoose'
 import type { FindVersions, PayloadRequest } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
@@ -25,7 +30,7 @@ export const findVersions: FindVersions = async function findVersions(
 ) {
   const Model = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = {
+  const options: QueryOptions = {
     ...(await withSession(this, req)),
     limit,
     skip,
@@ -52,11 +57,12 @@ export const findVersions: FindVersions = async function findVersions(
   const pipeline: PipelineStage[] = []
   const projection: Record<string, boolean> = {}
 
-  const query = Model.buildQuery({
+  const query = await Model.buildQuery({
     locale,
     payload: this.payload,
     pipeline,
     projection,
+    session: options.session,
     where,
   })
 
