@@ -127,16 +127,20 @@ export function buildSearchParam({
           continue
         }
 
-        pipeline.push({
-          $lookup: {
-            as: `_${currentPath}`,
-            foreignField: '_id',
-            from: pathToQuery.collectionSlug.endsWith('s')
-              ? pathToQuery.collectionSlug
-              : `${pathToQuery.collectionSlug}s`,
-            localField: i === 1 ? currentPath : `_${currentPath}`,
-          },
-        })
+        const as = `_${currentPath}`
+
+        if (!pipeline.some((stage) => (stage as PipelineStage.Lookup)?.$lookup?.as === as)) {
+          pipeline.push({
+            $lookup: {
+              as: `_${currentPath}`,
+              foreignField: '_id',
+              from: pathToQuery.collectionSlug.endsWith('s')
+                ? pathToQuery.collectionSlug
+                : `${pathToQuery.collectionSlug}s`,
+              localField: i === 1 ? currentPath : `_${currentPath}`,
+            },
+          })
+        }
 
         // Remove the joined doc from result if projection is passed
         if (i === 1 && typeof projection === 'object') {
