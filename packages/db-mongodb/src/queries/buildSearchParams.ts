@@ -133,9 +133,7 @@ export function buildSearchParam({
               $lookup: {
                 as: `${currentPath}_${pathToQuery.path}`,
                 foreignField: '_id',
-                from: pathToQuery.field.relationTo.endsWith('s')
-                  ? pathToQuery.field.relationTo
-                  : `${pathToQuery.field.relationTo}s`,
+                from: payload.db.collections[pathToQuery.field.relationTo].collection.name,
                 localField: `${currentPath}${pathToQuery.path}`,
               },
             })
