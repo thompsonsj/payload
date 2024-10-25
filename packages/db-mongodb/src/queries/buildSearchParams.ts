@@ -108,65 +108,47 @@ export function buildSearchParam({
     if (paths.length > 1) {
       let isID = false
 
-      let currentPath: string
+      let currentPath = ''
 
       for (let i = 0; i < paths.length; i++) {
         const pathToQuery = paths[i]
 
-        if (!currentPath) {
-          currentPath = pathToQuery.path
+        if (
+          pathToQuery.field.type === 'relationship' &&
+          typeof pathToQuery.field.relationTo === 'string' &&
+          i !== paths.length - 1
+        ) {
+          if (paths[i + 1].path === 'id') {
+            currentPath = `${currentPath}${pathToQuery.path}`
+            isID = true
+            break
+          }
+          const as = `${currentPath}_${pathToQuery.path}`
+          if (i === 0 && projection) {
+            projection[as] = false
+          }
+
+          if (!pipeline.some((pipeline: PipelineStage.Lookup) => pipeline?.$lookup?.as === as)) {
+            pipeline.push({
+              $lookup: {
+                as: `${currentPath}_${pathToQuery.path}`,
+                foreignField: '_id',
+                from: pathToQuery.field.relationTo.endsWith('s')
+                  ? pathToQuery.field.relationTo
+                  : `${pathToQuery.field.relationTo}s`,
+                localField: `${currentPath}${pathToQuery.path}`,
+              },
+            })
+          }
         }
-
-        // If the next is id, like article.id - don't need to add $lookup since we can query just article
-        if (i + 1 === paths.length - 1 && paths[i + 1].path === 'id') {
-          isID = true
-          break
-        }
-
-        if (i === 0) {
-          continue
-        }
-
-        const as = `_${currentPath}`
-
-        if (!pipeline.some((stage) => (stage as PipelineStage.Lookup)?.$lookup?.as === as)) {
-          pipeline.push({
-            $lookup: {
-              as: `_${currentPath}`,
-              foreignField: '_id',
-              from: pathToQuery.collectionSlug.endsWith('s')
-                ? pathToQuery.collectionSlug
-                : `${pathToQuery.collectionSlug}s`,
-              localField: i === 1 ? currentPath : `_${currentPath}`,
-            },
-          })
-        }
-
-        // Remove the joined doc from result if projection is passed
-        if (i === 1 && typeof projection === 'object') {
-          projection[`_${currentPath}`] = false
-        }
-
-        if (!currentPath) {
-          currentPath = pathToQuery.path
+        if (i === paths.length - 1) {
+          currentPath += pathToQuery.path
         } else {
-          currentPath = `${currentPath}.${pathToQuery.path}`
+          currentPath += `_${pathToQuery.path}.`
         }
       }
 
-      if (paths.length === 2 && paths[1].path === 'id') {
-        path = paths[0].path
-      } else {
-        path = `_${paths
-          .map((pathToQuery, i) => {
-            if (i + 1 === paths.length - 1 && paths[i + 1].path === 'id') {
-              return
-            }
-            return pathToQuery.path
-          })
-          .filter(Boolean)
-          .join('.')}`
-      }
+      path = currentPath
 
       if (isID && typeof formattedValue === 'string') {
         formattedValue = new ObjectId(formattedValue)

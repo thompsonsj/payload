@@ -875,11 +875,16 @@ describe('Relationships', () => {
         expect(query.docs[0].id).toStrictEqual(firstLevelID)
       })
 
-      it('should allow querying several times two levels deep', async () => {
+      it('should allow querying several times, one and two level deep', async () => {
         const query = await payload.find({
           collection: 'chained',
           where: {
             and: [
+              {
+                'relation.name': {
+                  equals: 'second',
+                },
+              },
               {
                 'relation.relation.name': {
                   equals: 'third',
