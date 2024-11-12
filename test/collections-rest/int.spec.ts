@@ -9,6 +9,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
+import { ensureIndexes } from '../helpers/ensureIndexes.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   customIdNumberSlug,
@@ -1091,8 +1092,10 @@ describe('collections-rest', () => {
       })
 
       describe('near', () => {
+        beforeEach(() => ensureIndexes(payload))
         const point = [10, 20]
         const [lat, lng] = point
+
         it('should return a document near a point', async () => {
           if (payload.db.name === 'sqlite') {
             return
@@ -1197,6 +1200,7 @@ describe('collections-rest', () => {
       })
 
       describe('within', () => {
+        beforeEach(() => ensureIndexes(payload))
         type Point = [number, number]
         const polygon: Point[] = [
           [9.0, 19.0], // bottom-left
@@ -1252,6 +1256,7 @@ describe('collections-rest', () => {
       })
 
       describe('intersects', () => {
+        beforeEach(() => ensureIndexes(payload))
         type Point = [number, number]
         const polygon: Point[] = [
           [9.0, 19.0], // bottom-left

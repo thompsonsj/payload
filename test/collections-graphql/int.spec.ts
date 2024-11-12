@@ -8,6 +8,7 @@ import { wait } from 'payload/shared'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Post } from './payload-types.js'
 
+import { ensureIndexes } from '../helpers/ensureIndexes.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
@@ -568,6 +569,7 @@ describe('collections-graphql', () => {
       })
 
       describe('near', () => {
+        beforeEach(() => ensureIndexes(payload))
         const point = [10, 20]
         const [lat, lng] = point
 
@@ -677,6 +679,7 @@ describe('collections-graphql', () => {
       })
 
       describe('within', () => {
+        beforeEach(() => ensureIndexes(payload))
         type Point = [number, number]
         const polygon: Point[] = [
           [9.0, 19.0], // bottom-left
@@ -750,6 +753,7 @@ describe('collections-graphql', () => {
       })
 
       describe('intersects', () => {
+        beforeEach(() => ensureIndexes(payload))
         type Point = [number, number]
         const polygon: Point[] = [
           [9.0, 19.0], // bottom-left

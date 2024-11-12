@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { LocalizedPost, LocalizedSort, WithLocalizedRelationship } from './payload-types.js'
 
+import { ensureIndexes } from '../helpers/ensureIndexes.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
@@ -304,66 +305,69 @@ describe('Localization', () => {
         expect(docs[2].id).toBe(doc_3.id)
       })
 
-      if (['mongodb'].includes(process.env.PAYLOAD_DATABASE)) {
-        describe('Localized sorting', () => {
-          let localizedAccentPostOne: LocalizedPost
-          let localizedAccentPostTwo: LocalizedPost
-          beforeEach(async () => {
-            localizedAccentPostOne = await payload.create({
-              collection,
-              data: {
-                title: 'non accent post',
-                localizedDescription: 'something',
-              },
-              locale: englishLocale,
-            })
-
-            localizedAccentPostTwo = await payload.create({
-              collection,
-              data: {
-                title: 'accent post',
-                localizedDescription: 'veterinarian',
-              },
-              locale: englishLocale,
-            })
-
-            await payload.update({
-              id: localizedAccentPostOne.id,
-              collection,
-              data: {
-                title: 'non accent post',
-                localizedDescription: 'valami',
-              },
-              locale: hungarianLocale,
-            })
-
-            await payload.update({
-              id: localizedAccentPostTwo.id,
-              collection,
-              data: {
-                title: 'accent post',
-                localizedDescription: 'állatorvos',
-              },
-              locale: hungarianLocale,
-            })
+      describe('Localized sorting', () => {
+        let localizedAccentPostOne: LocalizedPost
+        let localizedAccentPostTwo: LocalizedPost
+        beforeEach(async () => {
+          await ensureIndexes(payload)
+          localizedAccentPostOne = await payload.create({
+            collection,
+            data: {
+              title: 'non accent post',
+              localizedDescription: 'something',
+            },
+            locale: englishLocale,
           })
 
-          it('should sort alphabetically even with accented letters', async () => {
-            const sortByDescriptionQuery = await payload.find({
-              collection,
-              sort: 'description',
-              where: {
-                title: {
-                  like: 'accent',
-                },
-              },
-              locale: hungarianLocale,
-            })
+          localizedAccentPostTwo = await payload.create({
+            collection,
+            data: {
+              title: 'accent post',
+              localizedDescription: 'veterinarian',
+            },
+            locale: englishLocale,
+          })
 
-            expect(sortByDescriptionQuery.docs[0].id).toEqual(localizedAccentPostTwo.id)
+          await payload.update({
+            id: localizedAccentPostOne.id,
+            collection,
+            data: {
+              title: 'non accent post',
+              localizedDescription: 'valami',
+            },
+            locale: hungarianLocale,
+          })
+
+          await payload.update({
+            id: localizedAccentPostTwo.id,
+            collection,
+            data: {
+              title: 'accent post',
+              localizedDescription: 'állatorvos',
+            },
+            locale: hungarianLocale,
           })
         })
-      }
+
+        it('should sort alphabetically even with accented letters', async () => {
+          if (payload.db.name !== 'mongoose') {
+            return
+          }
+
+          const sortByDescriptionQuery = await payload.find({
+            collection,
+            sort: 'description',
+            where: {
+              title: {
+                like: 'accent',
+              },
+            },
+            locale: hungarianLocale,
+          })
+
+          expect(sortByDescriptionQuery.docs[0].id).toEqual(localizedAccentPostTwo.id)
+        })
+      })
     })
   })
 
@@ -2383,6 +2387,8 @@ describe('Localization', () => {
   })
 
   describe('localized with unique', () => {
+    beforeEach(() => ensureIndexes(payload))
+
     it('localized with unique should work for each locale', async () => {
       await payload.create({
         collection: 'localized-posts',
