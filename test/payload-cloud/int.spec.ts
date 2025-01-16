@@ -22,6 +22,17 @@ describe('@payloadcms/plugin-cloud', () => {
   })
 
   describe('tests', () => {
-    it.todo('plugin-cloud tests')
+    it('should initialize payload without error', async () => {
+      // test logic insignificant - only checking payload starts
+      // remove when payload-cloud tests are added
+      const user = await payload.create({
+        collection: 'users',
+        data: {
+          email: 'user@payloadcms.com',
+          password: 'password',
+        },
+      })
+      expect(user.email).toEqual('user@payloadcms.com')
+    })
   })
 })

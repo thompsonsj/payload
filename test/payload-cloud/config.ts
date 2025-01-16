@@ -1,6 +1,8 @@
 import { fileURLToPath } from 'node:url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+import type { TaskConfig } from 'payload'
+
 import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
 import dotenv from 'dotenv'
 import path from 'path'
@@ -22,6 +24,53 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [Media, Users],
+  jobs: {
+    tasks: [
+      {
+        // Configure this task to automatically retry
+        // up to two times
+        retries: 2,
+
+        // This is a unique identifier for the task
+
+        slug: 'createMedia',
+
+        // These are the arguments that your Task will accept
+        inputSchema: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+        ],
+
+        // These are the properties that the function should output
+        outputSchema: [
+          {
+            name: 'postID',
+            type: 'text',
+            required: true,
+          },
+        ],
+
+        // This is the function that is run when the task is invoked
+        handler: async ({ input, req }) => {
+          const newPost = await req.payload.create({
+            collection: 'media',
+            req,
+            data: {
+              alt: input.title || ``,
+            },
+          })
+          return {
+            output: {
+              postID: newPost.id,
+            },
+          }
+        },
+      } as TaskConfig<'createMedia'>,
+    ],
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
